@@ -39,17 +39,17 @@ directly.
 | Function | Peripheral | Pin | Notes |
 |---|---|---|---|
 | Motor A PWM | TIMx_CHx | PA8 | |
-| Motor A direction (AIN1/AIN2) | GPIO Output | PB4 | |
-| Motor B PWM | TIMx_CHx | PB6 | |
-| Motor B direction (BIN1/BIN2) | GPIO Output | PB3 | |
-| Driver standby (STBY) | GPIO Output | PD2 | Shared by both channels |
-| Encoder A (channels A/B) | TIMx encoder mode | PA5/PA1 | Consumes a full timer |
-| Encoder B (channels A/B) | TIMx encoder mode | PA6/PA7 | Consumes a full timer |
-| INA219 ×2 | I2Cx_SDA / SCL | PB8 | Shared bus, distinct I2C addresses |
+| Motor A direction (AIN1/AIN2) | GPIO Output |  | |
+| Motor B PWM | TIMx_CHx | PA15 | |
+| Motor B direction (BIN1/BIN2) | GPIO Output |  | |
+| Driver standby (STBY) | GPIO Output |  | Shared by both channels |
+| Encoder A (channels A/B) | TIMx encoder mode | PA6/PA7 | Consumes a full timer |
+| Encoder B (channels A/B) | TIMx encoder mode | PB6/PB7 | Consumes a full timer |
+| INA219 ×2 | I2Cx_SDA / SCL | PB8/PB9 | Shared bus, distinct I2C addresses |
 | LM35 | ADCx_INx | PA0-WKUP | Analog input |
 | UART telemetry | USARTx_TX / RX | PA2/PA3 | Via onboard ST-LINK virtual COM port |
-| Status LEDs | GPIO Output | PC12 | Fault/mode indication |
-| Mode button(s) | GPIO Input | PC11 | Pull-up/down configured |
+| Status LEDs | GPIO Output |  | Fault/mode indication |
+| Mode button(s) | GPIO Input |  | Pull-up/down configured |
 
 **Reserved, do not reassign:** SWD debug pins (ST-LINK), onboard user
 LED/button pins, virtual COM port UART pins.
