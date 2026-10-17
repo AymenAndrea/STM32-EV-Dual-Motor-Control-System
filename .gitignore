@@ -60,3 +60,8 @@ firmware/Release/
 
 # Python cache (from the simulation scripts)
 __pycache__/
+
+
+# CubeMX backup copies (old versions, not needed on GitHub)
+*.bak
+Backup/
