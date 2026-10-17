@@ -38,19 +38,20 @@ directly.
 
 | Function | Peripheral | Pin | Notes |
 |---|---|---|---|
-| Motor A PWM | TIMx_CHx | PA8 | |
-| Motor A direction (AIN1/AIN2) | GPIO Output | PB5/PB4 | |
-| Motor B PWM | TIMx_CHx | PA9 | |
-| Motor B direction (BIN1/BIN2) | GPIO Output | PB10/PA10 | |
-| Driver standby (STBY) | GPIO Output | PC7 | Shared by both channels |
-| Encoder A (channels A/B) | TIMx encoder mode | PA6/PA7 | Consumes a full timer |
-| Encoder B (channels A/B) | TIMx encoder mode | PB6/PB7 | Consumes a full timer |
-| INA219 ×2 | I2Cx_SDA / SCL | PB8/PB9 | Shared bus, distinct I2C addresses |
-| LM35 | ADCx_INx | PA0-WKUP | Analog input |
-| UART telemetry | USARTx_TX / RX | PA2/PA3 | Via onboard ST-LINK virtual COM port |
-| Status LEDs | GPIO Output | PA5 | Fault/mode indication |
-| Mode button(s) | GPIO Input | PC13 | Pull-up/down configured |
-| Timing probe(scope/LA) | GPIO Out | PC8 |  |
+| Motor A PWM | TIM1_CH1 | PA8 | 20 kHz (PSC 0, ARR 8999), 180 MHz timer clock |
+| Motor A direction (AIN1/AIN2) | GPIO Output | PB5/PB4 | User labels AIN1/AIN2 |
+| Motor B PWM | TIM1_CH2 | PA9 | Shares TIM1 with Motor A, same 20 kHz |
+| Motor B direction (BIN1/BIN2) | GPIO Output | PB10/PA10 | User labels BIN1/BIN2 |
+| Driver standby (STBY) | GPIO Output | PC7 | Shared by both channels; HIGH = driver enabled |
+| Encoder A (channels A/B) | TIM3 encoder mode (CH1/CH2) | PA6/PA7 | Consumes a full timer; 4200 counts per wheel rev |
+| Encoder B (channels A/B) | TIM4 encoder mode (CH1/CH2) | PB6/PB7 | Consumes a full timer; 4200 counts per wheel rev |
+| Control loop tick | TIM6 (basic timer) | — (internal) | 100 Hz (PSC 8999, ARR 99), update interrupt enabled |
+| INA219 ×2 | I2C1_SCL / I2C1_SDA | PB8/PB9 | Shared bus; 0x40 = motor A, 0x41 = motor B (A0 bridged) |
+| LM35 | ADC1_IN0 | PA0-WKUP | Analog input, 12-bit, 480-cycle sampling, 16-sample average |
+| UART telemetry | USART2_TX / USART2_RX | PA2/PA3 | 115200 baud, via onboard ST-LINK virtual COM port |
+| Status LED | GPIO Output (LD2) | PA5 | Onboard green LED; fault/mode indication |
+| Mode button | GPIO Input (B1) | PC13 | Onboard blue button, active-low (external pull-up on the Nucleo) |
+| Timing probe (scope/LA) | GPIO Output | PC8 | Toggled in the control loop to measure ISR timing |
 
 **Reserved, do not reassign:** SWD debug pins (ST-LINK), onboard user
 LED/button pins, virtual COM port UART pins.
