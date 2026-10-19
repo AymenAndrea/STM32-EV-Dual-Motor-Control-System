@@ -27,7 +27,7 @@ extern Motor motorA, motorB;
 extern Encoder encA, encB;
 extern PID pidA, pidB;
 extern INA219 inaA, inaB;
-extern ADC_HandleTypeDef hadc1;
 
 extern volatile float targetA, targetB;
 #endif /* INC_BOARD_H_ */
+

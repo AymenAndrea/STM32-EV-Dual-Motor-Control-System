@@ -11,7 +11,7 @@
 #include "main.h"       // HAL functions and pin names
 #include <stdio.h>      // printf
 #include "board.h"
-
+#include "safety.h"
 
 extern UART_HandleTypeDef huart2;
 
@@ -37,7 +37,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (htim->Instance == TIM6) {
         Encoder_Update(&encA);
         Encoder_Update(&encB);
-        if (STAGE >= 3){
+        if (STAGE >= 3 && sysState == STATE_NORMAL) {
         	/*Motor A*/
         	if (targetA == 0.0f){
         		Motor_Coast(&motorA);

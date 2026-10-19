@@ -41,8 +41,20 @@
 #define INA_B_ADDR 0x41
 #define INA_SHUNT_OHMS 0.1f
 
-/* ---- LM35 temperature ---- */
+/* LM35 temperature*/
 #define LM35_SAMPLES 16
 #define ADC_VREF_MV 3300.0f
+
+/* Faults*/
+#define SENSOR_PERIOD_MS 20u
+#define OC_LIMIT_MA 400.0f
+#define OC_TRIP_MS 100u
+#define OT_LIMIT_C 50.0f
+#define OT_CLEAR_C 45.0f
+#define STALL_DUTY 0.6f
+#define STALL_RPM 3.0f
+#define STALL_TRIP_MS 500u
+#define I2C_FAIL_LIMIT 5u
+#define TEMP_MIN_VALID_C 5.0f
 
 #endif /* INC_CONFIG_H_ */

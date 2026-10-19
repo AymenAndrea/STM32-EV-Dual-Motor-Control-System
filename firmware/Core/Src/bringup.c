@@ -6,6 +6,7 @@
  */
 #include "bringup.h"
 #include "board.h"
+#include "safety.h"
 #include "config.h"
 #include "main.h"
 #include <stdio.h>
@@ -24,7 +25,7 @@ void Bringup_Init(void)
         Motor_Standby(1);
         HAL_TIM_Base_Start_IT(&htim6);     /* start the 10 ms tick LAST */
     }
-    if (STAGE == 3) {
+    if (STAGE >= 3) {
         printf("Stage 3: closed-loop PID\r\n");
         Motor_Init(&motorA);
         Motor_Init(&motorB);
@@ -45,8 +46,9 @@ void Bringup_Loop(void)
     static float tempC = 0.0f;
     uint32_t now = HAL_GetTick();
 
-    /* LED blink - every stage */
-    if (now - t_led >= 500) {
+    uint32_t blink = 500;
+    if (sysState == STATE_FAULT) blink = 100;
+    if (now - t_led >= blink) {
         t_led = now;
         HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
     }
@@ -95,13 +97,13 @@ void Bringup_Loop(void)
                (long)encA.rpm, (long)encB.rpm);
     }
     /* Stage 3: change the target every 3 s: 40 -> 80 -> 0 -> repeat */
-    if (STAGE == 3 && now - t_step >= 3000) {
+    if (STAGE >= 3 && sysState == STATE_NORMAL && now - t_step >= 3000) {
         t_step = now;
 
         if (step == 0) {
             targetA = 40.0f;  targetB = 40.0f;
         } else if (step == 1) {
-            targetA = 80.0f;  targetB = 80.0;
+            targetA = 80.0f;  targetB = 80.0f;
         } else if (step == 2) {
             targetA = 0.0f;   targetB = 0.0f;
         }
@@ -111,15 +113,21 @@ void Bringup_Loop(void)
             step = 0;
         }
     }
-    /* Stage 3: read current + temperature every 100 ms */
-    if (STAGE == 3 && now - t_sens >= 100) {
+    /* Stage 3+: read sensors every 20 ms. Stage 4: then check for faults */
+    if (STAGE >= 3 && now - t_sens >= SENSOR_PERIOD_MS) {
         t_sens = now;
         INA219_Read(&inaA);
         INA219_Read(&inaB);
         tempC = LM35_ReadC(&hadc1);
+        if (STAGE >= 4) Safety_Check(tempC);
     }
-    /* Stage 3: print every 200 ms */
-    if (STAGE == 3 && now - t_p3 >= 200) {
+
+
+    if (STAGE >= 4 && HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET) {
+        Safety_Trip(F_ESTOP);
+    }
+
+    if (STAGE >= 3 && now - t_p3 >= 200) {
         t_p3 = now;
         printf("tgt %ld | A %ld rpm %ld%% | B %ld rpm %ld%%\r\n",
                (long)targetA,
@@ -131,5 +139,6 @@ void Bringup_Loop(void)
                (long)inaA.bus_V,
                (long)(inaA.bus_V * 10.0f) % 10,
                (long)tempC);
+        printf("state %d | faults %lu\r\n", (int)sysState, (unsigned long)faults);
     }
 }
