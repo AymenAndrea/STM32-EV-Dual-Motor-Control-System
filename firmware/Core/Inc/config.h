@@ -8,13 +8,12 @@
 #ifndef INC_CONFIG_H_
 #define INC_CONFIG_H_
 /* ---------------- Bring-up stage selector ----------------
- * 1 = UART hello + LED          6 = INA219 current/voltage
- * 2 = open-loop PWM, no encoder  7 = LM35 temperature
- * 3 = encoder counts (by hand)  8 = closed loop, motor A only
- * 4 = open-loop duty -> RPM     9 = FULL APPLICATION
- * 5 = I2C bus scan
+ * 1 = UART + LED (alive counter)
+ * 2 = motors + encoders, open loop test sequence
+ * 3 = closed-loop PID + INA219 + LM35
+ * 4 = stage 3 + fault detection + state machine
  */
-#define STAGE 3
+#define STAGE 4
 
 
 

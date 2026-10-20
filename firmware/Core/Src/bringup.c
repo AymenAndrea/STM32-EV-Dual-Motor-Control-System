@@ -26,7 +26,7 @@ void Bringup_Init(void)
         HAL_TIM_Base_Start_IT(&htim6);     /* start the 10 ms tick LAST */
     }
     if (STAGE >= 3) {
-        printf("Stage 3: closed-loop PID\r\n");
+        printf("Stage %d: closed-loop PID%s\r\n", STAGE, STAGE >= 4 ? " + faults" : "");
         Motor_Init(&motorA);
         Motor_Init(&motorB);
         Encoder_Init(&encA);
