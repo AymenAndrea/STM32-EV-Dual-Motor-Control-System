@@ -8,6 +8,7 @@
 #include "board.h"
 #include "safety.h"
 #include "config.h"
+#include "cli.h"
 #include "main.h"
 #include <stdio.h>
 
@@ -36,6 +37,7 @@ void Bringup_Init(void)
         INA219_Init(&inaA);
         INA219_Init(&inaB);
         Motor_Standby(1);
+        if (STAGE >= 4) CLI_Init();
         HAL_TIM_Base_Start_IT(&htim6);
     }
 }
@@ -126,6 +128,9 @@ void Bringup_Loop(void)
     if (STAGE >= 4 && HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET) {
         Safety_Trip(F_ESTOP);
     }
+
+    /* Stage 4: check for typed commands */
+    if (STAGE >= 4) CLI_Poll(tempC);
 
     if (STAGE >= 3 && now - t_p3 >= 200) {
         t_p3 = now;
