@@ -9,6 +9,7 @@
 #include "safety.h"
 #include "config.h"
 #include "cli.h"
+#include "telemetry.h"
 #include "main.h"
 #include <stdio.h>
 
@@ -39,13 +40,14 @@ void Bringup_Init(void)
         Motor_Standby(1);
         if (STAGE >= 4) CLI_Init();
         HAL_TIM_Base_Start_IT(&htim6);
+        if (STAGE >= 4) Telemetry_Header();
     }
 }
 
 void Bringup_Loop(void)
 {
     static uint32_t t_led = 0, t_print = 0, count = 0, t_step = 0, step = 0, t_rpm = 0, t_p3 = 0, t_sens = 0;
-    static float tempC = 0.0f;
+    static float tempC = 0.0f, t_tel = 0;
     uint32_t now = HAL_GetTick();
 
     uint32_t blink = 500;
@@ -132,7 +134,7 @@ void Bringup_Loop(void)
     /* Stage 4: check for typed commands */
     if (STAGE >= 4) CLI_Poll(tempC);
 
-    if (STAGE >= 3 && now - t_p3 >= 200) {
+    if (STAGE == 3 && now - t_p3 >= 200) {
         t_p3 = now;
         printf("tgt %ld | A %ld rpm %ld%% | B %ld rpm %ld%%\r\n",
                (long)targetA,
@@ -145,5 +147,9 @@ void Bringup_Loop(void)
                (long)(inaA.bus_V * 10.0f) % 10,
                (long)tempC);
         printf("state %d | faults %lu\r\n", (int)sysState, (unsigned long)faults);
+    }
+    if (STAGE >= 4 && tel_on == 1 && now - t_tel >= TELEM_PERIOD_MS) {
+           t_tel = now;
+           Telemetry_Line(tempC);
     }
 }

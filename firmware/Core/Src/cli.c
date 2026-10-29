@@ -9,6 +9,7 @@
 #include "board.h"
 #include "config.h"
 #include "safety.h"
+#include "telemetry.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,6 +91,13 @@ static void run(char *cmd, float tempC)
                    "clear       clear latched faults\r\n"
                    "status      print state, faults, rpm\r\n");
             return;
+        } else if (strcmp(name, "tel") == 0 && arg != NULL) {
+            if (strcmp(arg, "on") == 0) {
+                tel_on = 1;
+                Telemetry_Header();
+            } else {
+                tel_on = 0;
+            }
         } else if (strcmp(name, "clear") == 0) {
             Safety_Clear(tempC);
             return;

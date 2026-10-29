@@ -55,5 +55,6 @@
 #define STALL_TRIP_MS 500u
 #define I2C_FAIL_LIMIT 5u
 #define TEMP_MIN_VALID_C 5.0f
-
+/* Telemetry */
+#define TELEM_PERIOD_MS 100u
 #endif /* INC_CONFIG_H_ */
