@@ -99,7 +99,7 @@ void Bringup_Loop(void)
                (long)encA.rpm, (long)encB.rpm);
     }
     /* Stage 3: change the target every 3 s: 40 -> 80 -> 0 -> repeat */
-    if (STAGE >= 3 && sysState == STATE_NORMAL && now - t_step >= 3000) {
+    if (STAGE == 3 && sysState == STATE_NORMAL && now - t_step >= 3000) {
         t_step = now;
 
         if (step == 0) {
