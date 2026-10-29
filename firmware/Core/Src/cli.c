@@ -98,6 +98,12 @@ static void run(char *cmd, float tempC)
             } else {
                 tel_on = 0;
             }
+        } else if (strcmp(name, "step") == 0) {
+            step_t0 = HAL_GetTick();
+            step_active = 1;
+            tel_on = 1;
+            Telemetry_Header();
+            printf("# step test: 0 -> 60 -> 0 rpm\r\n");
         } else if (strcmp(name, "clear") == 0) {
             Safety_Clear(tempC);
             return;

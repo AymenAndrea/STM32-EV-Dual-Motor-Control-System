@@ -57,4 +57,5 @@
 #define TEMP_MIN_VALID_C 5.0f
 /* Telemetry */
 #define TELEM_PERIOD_MS 100u
+#define TELEM_STEP_MS 20u
 #endif /* INC_CONFIG_H_ */

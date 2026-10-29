@@ -11,7 +11,8 @@
 #include <stdio.h>
 
 int tel_on = 1;
-
+int step_active = 0;
+uint32_t step_t0 = 0;
 void Telemetry_Header(void)
 {
     printf("t_ms,state,faults,"

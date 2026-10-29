@@ -133,7 +133,23 @@ void Bringup_Loop(void)
 
     /* Stage 4: check for typed commands */
     if (STAGE >= 4) CLI_Poll(tempC);
+    if (STAGE >= 4 && step_active == 1) {
+           uint32_t t = now - step_t0;
 
+           if (sysState == STATE_FAULT) {
+               step_active = 0;
+               printf("# step test aborted (fault)\r\n");
+           } else if (t < 500) {
+               targetA = 0.0f;   targetB = 0.0f;
+           } else if (t < 2500) {
+               targetA = 60.0f;   targetB = 60.0f;
+           } else if (t < 4500) {
+               targetA = 0.0f;   targetB = 0.0f;
+           } else {
+               step_active = 0;
+               printf("# step test done\r\n");
+           }
+       }
     if (STAGE == 3 && now - t_p3 >= 200) {
         t_p3 = now;
         printf("tgt %ld | A %ld rpm %ld%% | B %ld rpm %ld%%\r\n",
@@ -148,7 +164,9 @@ void Bringup_Loop(void)
                (long)tempC);
         printf("state %d | faults %lu\r\n", (int)sysState, (unsigned long)faults);
     }
-    if (STAGE >= 4 && tel_on == 1 && now - t_tel >= TELEM_PERIOD_MS) {
+    uint32_t tel_period = TELEM_PERIOD_MS;
+       if (step_active == 1) tel_period = TELEM_STEP_MS;
+       if (STAGE >= 4 && tel_on == 1 && now - t_tel >= tel_period) {
            t_tel = now;
            Telemetry_Line(tempC);
     }
