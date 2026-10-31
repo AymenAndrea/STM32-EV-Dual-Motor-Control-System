@@ -30,8 +30,8 @@ while hardware ships.
 
 **What I did:**
 - Installed STM32CubeIDE, explored the CubeMX pin-configuration tool
-- Wrote a Python PID simulation (`simulation/pid_simulation.py`) to test
-  and tune control-gain behavior before real hardware was available
+- Planned a Python PID simulation to test control-gain behavior before
+  the hardware arrived (not built at this point; see later entry)
 - Planned pin assignments: PWM timers, encoder-mode timers, I2C bus, ADC
   input, UART — documented in `system-architecture.md`
 
