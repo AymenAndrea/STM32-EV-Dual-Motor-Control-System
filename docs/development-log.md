@@ -25,8 +25,7 @@ wiring.
 
 ## [Sept 15, 2026] — Simulation & toolchain setup
 
-**Status:** Preparing firmware structure and validating control approach
-while hardware ships.
+**Status:** Preparing firmware structure and planning the control approach.
 
 **What I did:**
 - Installed STM32CubeIDE, explored the CubeMX pin-configuration tool
