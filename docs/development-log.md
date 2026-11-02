@@ -339,3 +339,153 @@ awaiting hardware test.
   - Check the sensor readings against the multimeter
 - Add a state machine (IDLE / RUN / FAULT) with fault detection:
   overcurrent, overtemperature, sensor failure, stalled wheel
+
+---
+
+## [Oct 17, 2026] — Repo cleanup & first firmware release
+
+**Status:** Stage 1–3 firmware on GitHub; still not tested on hardware.
+
+**What I did:**
+- Moved the CubeIDE project into the repo's `firmware/` folder so the
+  code I build is the code on GitHub (the old OneDrive copy is retired)
+- Updated `.gitignore`: build output (`firmware/Debug/`, `Release/`),
+  CubeMX backups (`*.bak`, `Backup/`) and Python cache
+- Added doc templates for hardware verification and test results
+- Tagged pre-release `v0.3-closed-loop-firmware`
+
+**What I verified:**
+- Re-imported the project from `firmware/`: builds with 0 errors
+
+**Problems encountered:**
+- A first commit picked up ~150 files including build output; fixed
+  the `.gitignore` before pushing
+
+**Next:**
+- Fault detection and a safety state machine
+
+---
+
+## [Oct 19, 2026] — Safety state machine (Stage 4)
+
+**Status:** Fault protection written and compiling; awaiting hardware test.
+
+**What I did:**
+- Created `safety.h`/`safety.c` with two states, NORMAL and FAULT
+  (simpler than the IDLE/RUN/FAULT I planned: a target of 0 already
+  acts as idle)
+- 7 fault flags stored as bits in one variable: overcurrent A/B,
+  stall A/B, overtemperature, sensor failure, e-stop
+- `Safety_Trip()`: latches the fault, disables the driver (STBY low),
+  zeroes targets, coasts both motors, resets both PIDs
+- `Safety_Check()` runs every 20 ms with the sensor reads:
+  - Overcurrent: > 400 mA for 100 ms (a timer, so motor start-up
+    spikes don't trip it)
+  - Stall: duty > 60 % but < 3 RPM for 500 ms
+  - Sensor failure: 5 failed INA219 reads in a row, or LM35 < 5 °C
+    (a disconnected sensor reads near 0)
+  - Overtemperature: trips at 50 °C, clears by itself only below 45 °C
+    (hysteresis, so it can't flicker on and off)
+- E-stop on the blue user button (B1, active-low)
+- The control interrupt only drives the motors in NORMAL
+- Fast LED blink (100 ms) in FAULT, slow (500 ms) in NORMAL
+- All encoder input filters set to 10 to reject noise
+
+**What I verified:**
+- Builds with 0 errors
+
+**Problems encountered:**
+- Wrote `STALL_TRIP_MS` as `0.5f`: the timer counts milliseconds, so
+  it must be `500u`. Units matter in every `#define`
+- Mixed up `=` (assign) and `==` (compare) in a fault check
+
+**Next:**
+- A way to clear faults and change targets without reflashing: UART
+  commands
+
+---
+
+## [Oct 21–29, 2026] — UART command line
+
+**Status:** Command line written and compiling; awaiting hardware test.
+
+**What I did:**
+- UART2 receive by interrupt: each byte goes into a 64-byte ring buffer
+  (head/tail indexes), and the main loop reads it out
+- The receive is re-armed if a UART error stops it
+- `cli.c` builds a line until Enter, then splits it with `strtok` and
+  converts numbers with `strtof`
+- Commands: `a`/`b` (target RPM, clamped), `stop`, `kp`/`ki`/`kff`
+  (live gain tuning), `tel on/off`, `step`, `clear`, `status`, `help`
+- In FAULT only `clear`, `status` and `help` are accepted; `clear` is
+  refused while still over-temperature
+
+**What I verified:**
+- Builds with 0 errors
+
+**Problems encountered:**
+- Used `UART` instead of `USART2` in the receive callback: the
+  peripheral name must match CubeMX exactly
+
+**Next:**
+- Machine-readable telemetry for logging and plotting
+
+---
+
+## [Oct 29, 2026] — CSV telemetry & automated step test
+
+**Status:** Telemetry and step test written and compiling; awaiting
+hardware test.
+
+**What I did:**
+- `telemetry.c` prints one CSV row with 13 columns: time, state, faults,
+  then target/RPM/duty/current for each motor, bus voltage, temperature
+- 10 Hz normally, 50 Hz during a step test
+- `step` command: 0 RPM for 0.5 s → 60 RPM for 2 s → 0 RPM for 2 s,
+  aborted if a fault trips
+- Worked out the UART budget: at 115200 baud one character takes
+  ~87 µs, so a ~70-character row blocks the main loop ~6 ms. Fine at
+  50 Hz (20 ms), and the control loop runs in the interrupt anyway
+
+**What I verified:**
+- Builds with 0 errors
+
+**Problems encountered:**
+- `extern step_active;` with no type: `extern` only shares a variable,
+  it still needs `int`
+- Printed the wrong value in the last column (bus voltage instead of
+  temperature): checked each column against the header
+
+**Next:**
+- PC-side tools to save and plot the data
+
+---
+
+## [Oct 31 – Nov 1, 2026] — Python logger & step-response plotter
+
+**Status:** Both tools working on practice data; not yet used with the
+real board.
+
+**What I did:**
+- `tools/serial_logger.py`: reads the serial port in a background
+  thread, keeps only valid CSV rows, saves them to a file, and sends
+  typed commands to the board
+- `tools/plot_step.py`: plots target vs. measured RPM, saves a PNG, and
+  calculates overshoot and settling time (±5 % band, since one encoder
+  count is ~1.4 RPM)
+- Corrected the Sept 15 log entry: the Python simulation was planned
+  but not built yet
+
+**What I verified:**
+- Plotter on a practice CSV: 8.8 % overshoot, 400 ms settling,
+  matching the expected values
+
+**Problems encountered:**
+- `csv.reader` gives each row as a list, so `r["t_ms"]` crashed;
+  `csv.DictReader` gives rows by column name
+- Several files weren't saved before running: always Ctrl+S first
+
+**Next:**
+- Build the Python motor + PID simulation
+- Hardware bring-up: multimeter checks, then run Stages 2–4
+- Measure e-stop latency with a logic analyzer
