@@ -1,7 +1,7 @@
 # Test Results
 
 Results from each bring-up stage on real hardware.
-Fill in every `___`.
+**Status:** Pending hardware testing. The `___` fields are filled in during bring-up.
 
 **Setup:** motor supply ___ V (limit ___ A) · wheels off the ground · serial at 115200 baud
 

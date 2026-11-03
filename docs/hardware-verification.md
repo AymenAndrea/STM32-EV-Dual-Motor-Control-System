@@ -1,7 +1,7 @@
 # Hardware Verification
 
 Breadboard checks done **before** powering the motors.
-Fill in every `___`. Mark Pass with ✅ or ❌.
+**Status:** Pending hardware testing. The `___` fields are filled in during bring-up.
 
 **Date:** ___
 **Equipment:** DMM model ___ · Bench supply model ___

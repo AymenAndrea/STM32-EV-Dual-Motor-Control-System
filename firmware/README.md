@@ -11,7 +11,7 @@ STM32CubeIDE project for the Nucleo-F446RE (HAL library).
 | `DualMotor.ioc` | CubeMX configuration (clocks, timers, pins) |
 | `.project`, `.cproject`, `.mxproject` | CubeIDE project settings |
 | `STM32F446RETX_FLASH.ld`, `STM32F446RETX_RAM.ld` | Linker scripts (memory map) |
-| `.settings/`, `DualMotor Debug.launch` | IDE and debugger settings |
+| `.settings/` | IDE settings |
 
 `Debug/` (build output) is excluded by `.gitignore` and is recreated on every build.
 
@@ -28,10 +28,13 @@ STM32CubeIDE project for the Nucleo-F446RE (HAL library).
 | `lm35.c/.h` | ADC temperature driver (16-sample average) |
 | `bringup.c/.h` | Staged hardware tests selected by `STAGE` |
 | `app.c/.h` | Top level, `printf` → UART, 100 Hz control-loop callback |
+| `safety.c/.h` | NORMAL/FAULT state machine: overcurrent, stall, overtemp, sensor, e-stop faults (latched) |
+| `cli.c/.h` | UART command line (interrupt ring buffer): targets, gains, clear, status, step |
+| `telemetry.c/.h` | 13-column CSV output: 10 Hz, 50 Hz during a step test |
 
 ## Build and flash
 
 1. STM32CubeIDE → **File → Import → General → Existing Projects into Workspace** → select this `firmware` folder
    (leave "Copy projects into workspace" unticked).
-2. Set `STAGE` in `Core/Inc/config.h` (1 = heartbeat, 2 = open-loop + RPM, 3 = closed-loop PID + sensors).
+2. Set `STAGE` in `Core/Inc/config.h` (1 = heartbeat, 2 = open-loop + RPM, 3 = closed-loop PID + sensors, 4 = Stage 3 + safety, CLI, telemetry).
 3. Build (hammer) → Run. Serial terminal on the ST-LINK COM port at **115200 baud**.
