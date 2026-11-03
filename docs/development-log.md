@@ -489,3 +489,40 @@ real board.
 - Build the Python motor + PID simulation
 - Hardware bring-up: multimeter checks, then run Stages 2–4
 - Measure e-stop latency with a logic analyzer
+
+---
+
+## [Nov 2, 2026] — Python motor + PI simulation
+
+**Status:** Simulation built; gains give a predicted step response.
+Motor parameters are guesses until measured on hardware.
+
+**What I did:**
+- `simulation/motor_sim.py`: a first-order model of one N20 motor
+  - Each 10 ms tick the speed closes `DT / TAU` of the gap to
+    `duty × MAX_RPM`
+  - TAU = 0.12 s and MAX_RPM = 105 are guesses
+- Ported `PID_Update()` from `pid.c` to Python: same PI + feed-forward
+  math, same ±1.0 clamp and anti-windup, same gains as `config.h`
+- Ran the same profile as the firmware `step` command
+  (0 → 60 → 0 RPM) and saved it at 50 Hz in the telemetry CSV format
+- Analysed it with my own `plot_step.py`
+
+**Predicted results (simulation, not hardware):**
+- Overshoot: 6.6 % (peak 64.0 RPM)
+- Settling time (±5 %): 340 ms
+- Steady-state duty at 60 RPM: 0.57
+
+**Problems encountered:**
+- The motor stayed frozen at 60 RPM after the target dropped to 0: the
+  physics lines were indented inside the `else`, so they only ran when
+  the target wasn't 0. The overshoot numbers were still right; only the
+  plot showed the bug. Lesson: always look at the graph
+- `FileNotFoundError` when running from inside `simulation/`: relative
+  paths start from the terminal's folder, so scripts run from the
+  repo root
+
+**Next:**
+- Measure the real TAU and MAX_RPM (fixed duty, log RPM, find 63 %)
+  and update the model
+- Compare the real step test against these predictions
