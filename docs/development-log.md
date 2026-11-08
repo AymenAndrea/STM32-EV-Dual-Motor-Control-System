@@ -526,3 +526,53 @@ Motor parameters are guesses until measured on hardware.
 - Measure the real TAU and MAX_RPM (fixed duty, log RPM, find 63 %)
   and update the model
 - Compare the real step test against these predictions
+
+---
+
+## [Nov 8, 2026] — PID unwind fix & simulated regen braking
+
+**Status:** Regen written and compiling; logic tested on the PC against
+a simulated motor. Not yet tested on hardware.
+
+**What I did:**
+- PID anti-windup: while the output is clamped, the integral was frozen
+  in both directions and could get stuck. Now it may still change in the
+  direction that brings the output back off the limit. Same change in
+  `pid.c` and in the Python simulation
+- Added a third state, `STATE_REGEN`, kept at value 2 so the telemetry
+  numbers for NORMAL and FAULT didn't change
+- `regen_wanted()` decides per motor: regen when a spinning motor is
+  asked to slow down, stop, or reverse
+  - Enter when the target is 10 RPM below the speed, exit within 3 RPM
+    (hysteresis, so the state can't flicker)
+  - No regen below 5 RPM
+- During regen the PID's duty limits are tightened on one side, so the
+  duty can never push against the rotation (no plugging). At duty 0 the
+  TB6612 short-brakes
+- A target of 0 now brakes first and only coasts below 5 RPM
+- It's called "simulated" because the braking energy turns into heat in
+  the motor and driver instead of being stored
+
+**What I verified:**
+- Builds with 0 errors
+- Ran `regen_wanted()` against 7 test cases on the PC: all correct
+- Ran the control loop against a simulated motor on the PC:
+  - 60 → 0 RPM: brakes (state 2), duty never negative, then coasts
+  - 60 → −40 RPM: brakes first, reverses only below 5 RPM
+  - During a FAULT the state stays FAULT
+
+**Problems encountered:**
+- Adding a new state broke an old check: `sysState == STATE_NORMAL`
+  would have stopped the control loop during regen. Changed it to
+  `!= STATE_FAULT`, and searched for every use of the state
+- Declared `float regenA` inside the interrupt, which made a new
+  variable that hid the `static` one and lost its value every tick
+- Passed `-loA` to the PID. `loA` was already negative, so both limits
+  became +1.0, which would have forced full speed forward. It compiled
+  with 0 errors, so reading the code was the only thing that caught it
+
+**Next:**
+- Hardware: run the regen tests and check that the current goes negative
+- Watch for braking current tripping the 400 mA overcurrent limit
+  (the check uses the absolute value)
+- Measure the real TAU and MAX_RPM for the simulation
