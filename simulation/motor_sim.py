@@ -16,12 +16,15 @@ def pid_update(target, meas, integ):
     u = ff + p + i_new
     if u > 1.0:
         u = 1.0
+        if err < 0.0:
+            integ = i_new
     elif u < -1.0:
         u = -1.0
+        if err > 0.0:
+            integ = i_new
     else:
         integ = i_new
     return u, integ
-
 rpm = 0.0          # current speed (rpm)
 integ = 0.0        # integral term
 

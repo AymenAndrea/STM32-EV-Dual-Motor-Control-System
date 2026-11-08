@@ -34,8 +34,10 @@ float PID_Update(PID *p, float setpoint, float meas, float dt,
 
     if (u > out_max) {
         u = out_max;
+        if (err < 0.0f) p->integ = i_new;
     } else if (u < out_min) {
         u = out_min;
+        if (err > 0.0f) p->integ = i_new;
     } else {
         p->integ = i_new;
     }
