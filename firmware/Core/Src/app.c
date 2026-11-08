@@ -10,6 +10,7 @@
 #include "config.h"     // for STAGE
 #include "main.h"       // HAL functions and pin names
 #include <stdio.h>      // printf
+#include <math.h>
 #include "board.h"
 #include "safety.h"
 
@@ -32,27 +33,75 @@ void App_Loop(void)
 {
 	Bringup_Loop();
 }
+static int regenA = 0;
+static int regenB = 0;
+
+static int regen_wanted(float target, float rpm, int in_regen){
+	float margin = REGEN_ENTER_RPM;
+	if (in_regen == 1){
+		margin = REGEN_EXIT_RPM;
+	}
+	if (fabsf(rpm)<REGEN_MIN_RPM){
+		return 0;
+	}
+	if (target * rpm <= 0.0f){
+		return 1;
+	}
+	if (fabsf(target) < fabsf(rpm) - margin){
+		return 1;
+	}
+	return 0;
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM6) {
         Encoder_Update(&encA);
         Encoder_Update(&encB);
-        if (STAGE >= 3 && sysState == STATE_NORMAL) {
+        if (STAGE >= 3 && sysState != STATE_FAULT) {
         	/*Motor A*/
-        	if (targetA == 0.0f){
+        	regenA = regen_wanted(targetA, encA.rpm, regenA);
+        	float loA = -MAX_DUTY;
+        	float hiA = MAX_DUTY;
+        	if (regenA == 1){
+        		if(encA.rpm > 0.0f){
+        			loA = 0.0f;
+        		}
+        		else {
+        			hiA = 0.0f;
+        		}
+        	}
+        	if (targetA == 0.0f && regenA == 0){
         		Motor_Coast(&motorA);
         		PID_Reset(&pidA, encA.rpm);
         	} else{
-        		float dutyA = PID_Update(&pidA, targetA, encA.rpm, CTRL_DT_S, -MAX_DUTY, MAX_DUTY);
+        		float dutyA = PID_Update(&pidA, targetA, encA.rpm, CTRL_DT_S, loA, hiA);
         		Motor_Set(&motorA, dutyA);
         	}
         	/*Motor B*/
-        	if (targetB == 0.0f){
+        	regenB = regen_wanted(targetB, encB.rpm, regenB);
+        	float loB = -MAX_DUTY;
+        	float hiB = MAX_DUTY;
+        	if (regenB == 1){
+        		if (encB.rpm > 0.0f){
+        			loB = 0.0f;
+        		}
+        		else {
+        			hiB = 0.0f;
+        		}
+        	}
+        	if (targetB == 0.0f && regenB == 0){
         	    Motor_Coast(&motorB);
         	    PID_Reset(&pidB, encB.rpm);
         	} else{
-        	    float dutyB = PID_Update(&pidB, targetB, encB.rpm, CTRL_DT_S, -MAX_DUTY, MAX_DUTY);
+        	    float dutyB = PID_Update(&pidB, targetB, encB.rpm, CTRL_DT_S, loB, hiB);
         	    Motor_Set(&motorB, dutyB);
+        	}
+        	if (regenA == 1 || regenB == 1){
+        		sysState = STATE_REGEN;
+        	}
+        	else{
+        		sysState = STATE_NORMAL;
         	}
         }
     }

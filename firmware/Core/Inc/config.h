@@ -34,7 +34,9 @@
 #define PID_KD 0.0f
 #define PID_KFF 0.003f
 #define MAX_RPM_CMD 110.0f
-
+#define REGEN_MIN_RPM 5.0f
+#define REGEN_ENTER_RPM 10.0f
+#define REGEN_EXIT_RPM 3.0f
 /* INA219 current sensors */
 #define INA_A_ADDR 0x40
 #define INA_B_ADDR 0x41

@@ -9,7 +9,7 @@
 #define INC_SAFETY_H_
 #include <stdint.h>
 
-typedef enum { STATE_NORMAL = 0, STATE_FAULT  = 1} SysState;
+typedef enum { STATE_NORMAL = 0, STATE_FAULT  = 1, STATE_REGEN = 2} SysState;
 
 /* fault bits: one bit per fault, several can be on at once */
 #define F_OC_A      (1u << 0) /* overcurrent, motor A */
