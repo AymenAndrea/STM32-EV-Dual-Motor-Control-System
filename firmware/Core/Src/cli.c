@@ -89,6 +89,8 @@ static void run(char *cmd, float tempC)
                    "stop        both targets to 0\r\n"
                    "kp|ki|kff <value>   change a gain   e.g. kp 0.01\r\n"
                    "clear       clear latched faults\r\n"
+            		"tel on|off telemetry on or off\r\n"
+            		"step       run the step test\r\n"
                    "status      print state, faults, rpm\r\n");
             return;
         } else if (strcmp(name, "tel") == 0 && arg != NULL) {
