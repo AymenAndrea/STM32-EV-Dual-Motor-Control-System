@@ -50,8 +50,8 @@ directly.
 | LM35 | ADC1_IN0 | PA0-WKUP | Analog input, 12-bit, 480-cycle sampling, 16-sample average |
 | UART telemetry | USART2_TX / USART2_RX | PA2/PA3 | 115200 baud, via onboard ST-LINK virtual COM port |
 | Status LED | GPIO Output (LD2) | PA5 | Onboard green LED; fault/mode indication |
-| Mode button | GPIO Input (B1) | PC13 | Onboard blue button, active-low (external pull-up on the Nucleo) |
-| Timing probe (scope/LA) | GPIO Output | PC8 | Toggled in the control loop to measure ISR timing |
+| E-stop button | GPIO Input (B1) | PC13 | Onboard blue button, active-low (external pull-up on the Nucleo). Press = latched fault |
+| Timing probe (scope/LA) | GPIO Output | PC8 | Planned, not yet in the firmware |
 
 **Reserved, do not reassign:** SWD debug pins (ST-LINK), onboard user
 LED/button pins, virtual COM port UART pins.
@@ -62,7 +62,7 @@ LED/button pins, virtual COM port UART pins.
 |---|---|
 | Normal | Standard closed-loop PID speed control, both motors |
 | Regen-simulated | Simulated regenerative-braking behavior on deceleration |
-| Fault | Triggered by overcurrent or overtemperature; motors disabled until cleared |
+| Fault | Triggered by overcurrent, overtemperature, stall, sensor failure, or e-stop; motors disabled until cleared (overtemperature clears itself below 45 °C) |
 
 ## Data Flow Out (Telemetry)
 

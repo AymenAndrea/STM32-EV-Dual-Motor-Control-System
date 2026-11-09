@@ -23,7 +23,7 @@ wiring.
 
 ---
 
-## [Sept 15, 2026] — Simulation & toolchain setup
+## [Sept 15, 2026] — Toolchain setup & planning
 
 **Status:** Preparing firmware structure and planning the control approach.
 

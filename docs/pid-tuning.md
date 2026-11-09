@@ -1,6 +1,8 @@
 # PID Tuning
 
-**Method:** change one gain at a time; run the Stage 3 step test (40 → 80 RPM); record the result.
+**Status:** Pending hardware testing. The `___` fields are filled in during tuning.
+
+**Method:** change one gain at a time; run the Stage 4 step test (`step` command, 0 → 60 → 0 RPM); record the result.
 
 **Controller:** PI + feed-forward, anti-windup (conditional integration), derivative on measurement (Kd = 0 by default because encoder quantization ≈ 1.4 RPM/count at 100 Hz).
 

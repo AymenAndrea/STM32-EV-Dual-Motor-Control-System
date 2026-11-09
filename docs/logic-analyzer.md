@@ -1,4 +1,5 @@
 # Logic Analyzer Captures
+**Status:** Pending hardware testing. The `___` fields are filled in during bring-up.
 
 **Analyzer:** ___ · **Software:** ___ · **Sample rate:** ___ MS/s
 
